@@ -1,0 +1,14 @@
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/bin/Debug/net10.0/ConsoleApp
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/bin/Debug/net10.0/ConsoleApp.deps.json
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/bin/Debug/net10.0/ConsoleApp.runtimeconfig.json
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/bin/Debug/net10.0/ConsoleApp.dll
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/bin/Debug/net10.0/ConsoleApp.pdb
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/obj/Debug/net10.0/ConsoleApp.GeneratedMSBuildEditorConfig.editorconfig
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/obj/Debug/net10.0/ConsoleApp.AssemblyInfoInputs.cache
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/obj/Debug/net10.0/ConsoleApp.AssemblyInfo.cs
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/obj/Debug/net10.0/ConsoleApp.csproj.CoreCompileInputs.cache
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/obj/Debug/net10.0/ConsoleApp.dll
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/obj/Debug/net10.0/refint/ConsoleApp.dll
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/obj/Debug/net10.0/ConsoleApp.pdb
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/obj/Debug/net10.0/ConsoleApp.genruntimeconfig.cache
+/Users/darialasecka/Documents/HTD/Tutorials/ASP.NET/ConsoleApp/obj/Debug/net10.0/ref/ConsoleApp.dll
