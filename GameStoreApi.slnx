@@ -1,8 +1,0 @@
-<Solution>
-  <Folder Name="/GameStore/">
-    <Project Path="GameStore/GameStoreApi/GameStoreApi.csproj" />
-  </Folder>
-  <Folder Name="/BlazorApp">
-    <Project Path="BlazorApp/BlazorApp.csproj" />
-  </Folder>
-</Solution>
