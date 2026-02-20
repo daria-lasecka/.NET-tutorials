@@ -13,3 +13,8 @@ app.MapGamesEndpoints();
 app.MigrateDb();
 
 app.Run();
+
+// during the course instead of running 
+//  $env:ConnectionStrings__GameStore="Data Source=Production.db" (Windows's Power Shell)
+// run
+//  export ConnectionStrings__GameStore="Data Source=Production.db"
