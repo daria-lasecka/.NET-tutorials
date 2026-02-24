@@ -1,5 +1,6 @@
 using ContosoPizza.Data;
 using ContosoPizza.Services;
+using System.Globalization;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -10,8 +11,17 @@ builder.Services.AddRazorPages();
 builder.Services.AddDbContext<PizzaContext>(options =>
     options.UseSqlite("Data Source=ContosoPizza.db"));
 builder.Services.AddScoped<PizzaService>();
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    var supportedCultures = new[] { new CultureInfo("en-US") };
+    options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("en-US");
+    options.SupportedCultures = supportedCultures;
+    options.SupportedUICultures = supportedCultures;
+});
 
 var app = builder.Build();
+
+app.UseRequestLocalization();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
