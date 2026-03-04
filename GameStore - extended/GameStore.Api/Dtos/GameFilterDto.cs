@@ -2,14 +2,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace GameStore.Api.Dtos;
 
-public record GameFilter(
+public record GameFilterDto(
     string? Name,
-    //string? Genre,
+    string? Genre,
     int? GenreId,
-    [Range(0, double.MaxValue)] decimal? MinPrice,
-    [Range(0, double.MaxValue)] decimal? MaxPrice,
+    decimal? MinPrice,
+    decimal? MaxPrice,
     DateOnly? ReleasedAfter,
     DateOnly? ReleasedBefore,
-    [Range(1, int.MaxValue)] int PageNumber = 1,
-    [Range(1, 100)] int PageSize = 10
+    int? PageNumber,
+    int? PageSize
 );

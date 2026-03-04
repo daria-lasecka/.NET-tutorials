@@ -13,7 +13,7 @@ public class GameService : IGameService
         _dbContext = dbContext;
     }
 
-    public async Task<PagedResult<GameSummaryDto>> GetGamesAsync(GameFilter filter)
+    public async Task<PagedResult<GameSummaryDto>> GetGamesAsync(GameFilterDto filter)
     {
         var query = _dbContext.Games
                        .Include(game => game.Genre)
@@ -34,14 +34,23 @@ public class GameService : IGameService
 
         // TODO: add filtering by release date
 
+        // Pagination
+        var pageNumber = (filter.PageNumber.HasValue && filter.PageNumber.Value > 0)
+            ? filter.PageNumber.Value
+            : 1;
+
+        var pageSize = (filter.PageSize.HasValue && filter.PageSize.Value > 0)
+            ? filter.PageSize.Value
+            : 10;
+
         var totalCount = await query.CountAsync();
 
         // TODO: handle custom order by (default to name)
         // TODO: handle custom asc/desc
         var items = await query
             .OrderBy(game => game.Name)
-            .Skip((filter.PageNumber - 1) * filter.PageSize)
-            .Take(filter.PageSize)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
             .Select(g => new GameSummaryDto(
                 g.Id,
                 g.Name,
@@ -54,8 +63,8 @@ public class GameService : IGameService
 
         return new PagedResult<GameSummaryDto>(
             items,
-            filter.PageNumber,
-            filter.PageSize,
+            pageNumber,
+            pageSize,
             totalCount
         );
     }
