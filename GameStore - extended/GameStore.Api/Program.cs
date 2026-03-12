@@ -45,6 +45,7 @@ app.MapWhen(
 
 app.MapGamesEndpoints();
 app.MapGenresEndpoints();
+app.MapPublishersEndpoints();
 
 app.MigrateDb();
 

@@ -58,7 +58,7 @@ public class GameService : IGameService
             .Select(g => new GameSummaryDto(
                 g.Id,
                 g.Name,
-                g.Publisher!.Name,
+                g.Publisher!.Name, // TODO: might be unknow publisher?
                 g.GameGenres.Select(gg => gg.Genre.Name).ToList(),
                 g.Price,
                 g.ReleaseDate
@@ -155,6 +155,7 @@ public class GameService : IGameService
 
     public async Task<bool> DeleteAsync(int id)
     {
+        // TODO: delete genres too
         var deleted = await _dbContext.Games
             .Where(game => game.Id == id)
             .ExecuteDeleteAsync();
