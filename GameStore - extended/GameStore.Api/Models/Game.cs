@@ -12,4 +12,7 @@ public class Game
     public decimal Price { get; set; }
 
     public DateOnly ReleaseDate { get; set; }
+
+    public int PublisherId { get; set; }
+    public Publisher? Publisher { get; set; }
 }

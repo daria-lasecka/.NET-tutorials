@@ -16,11 +16,6 @@ var app = builder.Build();
 // app.UseMiddleware<MaintenanceMiddleware>();
 app.UseMaintenance();
 
-app.MapGamesEndpoints();
-app.MapGenresEndpoints();
-
-app.MigrateDb();
-
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();               // Available at /openapi/v1.json
@@ -32,7 +27,8 @@ else
     app.UseHsts();
 }
 
-app.UseMiddleware<RequestLoggingMiddleware>();
+// app.UseMiddleware<RequestLoggingMiddleware>();
+app.UseRequestLogging();
 
 app.UseWhen(
     context => context.Request.Path.StartsWithSegments("/api"),
@@ -46,6 +42,11 @@ app.MapWhen(
         await context.Response.WriteAsJsonAsync(new { Status = "Healthy" });
     })
 );
+
+app.MapGamesEndpoints();
+app.MapGenresEndpoints();
+
+app.MigrateDb();
 
 /* 
 Recommended execution order:
