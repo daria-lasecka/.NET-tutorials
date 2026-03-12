@@ -13,7 +13,7 @@ public class GameService : IGameService
         _dbContext = dbContext;
     }
 
-    public async Task<PagedResult<GameSummaryDto>> GetGamesAsync(GameFilterDto filter)
+    public async Task<PagedResult<GameSummaryDto>> GetGamesAsync(GameFilterDto filter, PaginationDto pagination)
     {
         var query = _dbContext.Games
                        .Include(game => game.Genre)
@@ -32,16 +32,15 @@ public class GameService : IGameService
         if (filter.MaxPrice.HasValue)
             query = query.Where(game => game.Price <= filter.MaxPrice);
 
-        // TODO: add filtering by release date
+        if (filter.ReleasedAfter.HasValue)
+            query = query.Where(game => game.ReleaseDate >= filter.ReleasedAfter);
+
+        if (filter.ReleasedBefore.HasValue)
+            query = query.Where(game => game.ReleaseDate <= filter.ReleasedBefore);
 
         // Pagination
-        var pageNumber = (filter.PageNumber.HasValue && filter.PageNumber.Value > 0)
-            ? filter.PageNumber.Value
-            : 1;
-
-        var pageSize = (filter.PageSize.HasValue && filter.PageSize.Value > 0)
-            ? filter.PageSize.Value
-            : 10;
+        var pageNumber = Math.Max(pagination.PageNumber, 1);
+        var pageSize = Math.Clamp(pagination.PageSize, 1, 100);
 
         var totalCount = await query.CountAsync();
 

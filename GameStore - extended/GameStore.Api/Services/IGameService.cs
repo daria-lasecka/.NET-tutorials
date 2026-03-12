@@ -3,7 +3,7 @@ using GameStore.Api.Dtos;
 
 public interface IGameService
 {
-    Task<PagedResult<GameSummaryDto>> GetGamesAsync(GameFilterDto filter);
+    Task<PagedResult<GameSummaryDto>> GetGamesAsync(GameFilterDto filter, PaginationDto pagination);
     Task<GameDetailsDto?> GetByIdAsync(int id);
     Task<GameDetailsDto> CreateAsync(CreateGameDto dto);
     Task<bool> UpdateAsync(int id, UpdateGameDto dto);

@@ -15,9 +15,9 @@ public static class GamesEndpoints
         var group = app.MapGroup("/games");
 
         // GET /games
-        group.MapGet("/", async ([AsParameters] GameFilterDto filter, [FromServices] IGameService gameService) =>
+        group.MapGet("/", async ([AsParameters] GameFilterDto filter, [AsParameters] PaginationDto pagination, [FromServices] IGameService gameService) =>
         {
-            var result = await gameService.GetGamesAsync(filter);
+            var result = await gameService.GetGamesAsync(filter, pagination);
             return Results.Ok(result);
         })
         .WithSummary("Get Games")
@@ -32,7 +32,7 @@ public static class GamesEndpoints
 
             return game is null ? Results.NotFound() : Results.Ok(game);
         })
-           .WithName(GetGameEndpointName) // TODO: add this kind of documentation to all endpoints 
+           .WithName(GetGameEndpointName)
            .WithSummary("Get game by ID")
            .WithDescription("Returns a single game based on their unique identifier. Returns 404 if the game doesn't exist.")
            .Produces<GameDetailsDto>(StatusCodes.Status200OK)
