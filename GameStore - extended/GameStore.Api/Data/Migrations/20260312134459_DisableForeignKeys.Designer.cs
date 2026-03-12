@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameStore.Api.Data.Migrations
 {
     [DbContext(typeof(GameStoreContext))]
-    [Migration("20260312093459_AddPublishers")]
-    partial class AddPublishers
+    [Migration("20260312134459_DisableForeignKeys")]
+    partial class DisableForeignKeys
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -20,13 +20,25 @@ namespace GameStore.Api.Data.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "10.0.3");
 
+            modelBuilder.Entity("GameGenre", b =>
+                {
+                    b.Property<int>("GameId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GenreId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("GameId", "GenreId");
+
+                    b.HasIndex("GenreId");
+
+                    b.ToTable("GameGenres");
+                });
+
             modelBuilder.Entity("GameStore.Api.Models.Game", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("GenreId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -36,15 +48,13 @@ namespace GameStore.Api.Data.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("PublisherId")
+                    b.Property<int?>("PublisherId")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateOnly>("ReleaseDate")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("GenreId");
 
                     b.HasIndex("PublisherId");
 
@@ -81,23 +91,42 @@ namespace GameStore.Api.Data.Migrations
                     b.ToTable("Publishers");
                 });
 
-            modelBuilder.Entity("GameStore.Api.Models.Game", b =>
+            modelBuilder.Entity("GameGenre", b =>
                 {
+                    b.HasOne("GameStore.Api.Models.Game", "Game")
+                        .WithMany("GameGenres")
+                        .HasForeignKey("GameId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("GameStore.Api.Models.Genre", "Genre")
-                        .WithMany()
+                        .WithMany("GameGenres")
                         .HasForeignKey("GenreId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GameStore.Api.Models.Publisher", "Publisher")
-                        .WithMany("Games")
-                        .HasForeignKey("PublisherId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Game");
 
                     b.Navigation("Genre");
+                });
+
+            modelBuilder.Entity("GameStore.Api.Models.Game", b =>
+                {
+                    b.HasOne("GameStore.Api.Models.Publisher", "Publisher")
+                        .WithMany("Games")
+                        .HasForeignKey("PublisherId");
 
                     b.Navigation("Publisher");
+                });
+
+            modelBuilder.Entity("GameStore.Api.Models.Game", b =>
+                {
+                    b.Navigation("GameGenres");
+                });
+
+            modelBuilder.Entity("GameStore.Api.Models.Genre", b =>
+                {
+                    b.Navigation("GameGenres");
                 });
 
             modelBuilder.Entity("GameStore.Api.Models.Publisher", b =>

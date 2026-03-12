@@ -35,32 +35,4 @@ public class GameStoreContext(DbContextOptions<GameStoreContext> options)
             .WithMany(g => g.GameGenres)
             .HasForeignKey(gg => gg.GenreId);
     }
-
-    protected override void Up(MigrationBuilder migrationBuilder)
-    {
-        migrationBuilder.AddColumn<int>(
-            name: "PublisherId",
-            table: "Games",
-            type: "INTEGER",
-            nullable: false,
-            defaultValue: 0);
-
-        migrationBuilder.CreateTable(
-            name: "Publishers",
-            columns: table => new
-            {
-                Id = table.Column<int>(type: "INTEGER", nullable: false)
-                    .Annotation("Sqlite:Autoincrement", true),
-                Name = table.Column<string>(type: "TEXT", nullable: false)
-            },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_Publishers", x => x.Id);
-            });
-
-        migrationBuilder.CreateIndex(
-            name: "IX_Games_PublisherId",
-            table: "Games",
-            column: "PublisherId");
-    }
 }
