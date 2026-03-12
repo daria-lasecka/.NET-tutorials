@@ -16,7 +16,9 @@ public class GameService : IGameService
     public async Task<PagedResult<GameSummaryDto>> GetGamesAsync(GameFilterDto filter, PaginationDto pagination)
     {
         var query = _dbContext.Games
-                       .Include(game => game.Genre)
+                       .Include(g => g.Publisher)
+                       .Include(g => g.GameGenres)
+                        .ThenInclude(gg => gg.Genre)
                        .AsQueryable();
 
         // Filtering
@@ -24,7 +26,10 @@ public class GameService : IGameService
             query = query.Where(game => game.Name.Contains(filter.Name));
 
         if (filter.GenreId.HasValue)
-            query = query.Where(game => game.GenreId == filter.GenreId);
+            query = query.Where(game => game.GameGenres.Any(gg => gg.GenreId == filter.GenreId.Value));
+
+        if (filter.PublisherId.HasValue)
+            query = query.Where(game => game.PublisherId == filter.PublisherId.Value);
 
         if (filter.MinPrice.HasValue)
             query = query.Where(game => game.Price >= filter.MinPrice);
@@ -53,7 +58,8 @@ public class GameService : IGameService
             .Select(g => new GameSummaryDto(
                 g.Id,
                 g.Name,
-                g.Genre!.Name,
+                g.Publisher!.Name,
+                g.GameGenres.Select(gg => gg.Genre.Name).ToList(),
                 g.Price,
                 g.ReleaseDate
             ))
@@ -75,7 +81,8 @@ public class GameService : IGameService
             .Select(game => new GameDetailsDto(
                 game.Id,
                 game.Name,
-                game.GenreId,
+                game.PublisherId,
+                game.GameGenres.Select(gg => gg.GenreId).ToList(),
                 game.Price,
                 game.ReleaseDate
             ))
@@ -86,10 +93,11 @@ public class GameService : IGameService
 
     public async Task<GameDetailsDto> CreateAsync(CreateGameDto newGame)
     {
+
         Game game = new()
         {
             Name = newGame.Name,
-            GenreId = newGame.GenreId,
+            PublisherId = newGame.PublisherId,
             Price = newGame.Price,
             ReleaseDate = newGame.ReleaseDate
         };
@@ -97,18 +105,27 @@ public class GameService : IGameService
         _dbContext.Games.Add(game);
         await _dbContext.SaveChangesAsync();
 
-        return new GameDetailsDto(
-            game.Id,
-            game.Name,
-            game.GenreId,
-            game.Price,
-            game.ReleaseDate
-        );
+        // Assign genres
+        if (newGame.GenreIds != null && newGame.GenreIds.Count != 0)
+        {
+            var gameGenres = newGame.GenreIds.Select(genreId => new GameGenre
+            {
+                GameId = game.Id,
+                GenreId = genreId
+            });
+            _dbContext.GameGenres.AddRange(gameGenres);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        // TODO: handle error 
+        return await GetByIdAsync(game.Id) ?? throw new InvalidOperationException("Game creation failed");
     }
 
     public async Task<bool> UpdateAsync(int id, UpdateGameDto updatedGame)
     {
-        var existingGame = await _dbContext.Games.FindAsync(id);
+        var existingGame = await _dbContext.Games
+            .Include(g => g.GameGenres)
+            .FirstOrDefaultAsync(g => g.Id == id);
 
         if (existingGame is null)
         {
@@ -116,9 +133,21 @@ public class GameService : IGameService
         }
 
         existingGame.Name = updatedGame.Name;
-        existingGame.GenreId = updatedGame.GenreId;
+        existingGame.PublisherId = updatedGame.PublisherId;
         existingGame.Price = updatedGame.Price;
         existingGame.ReleaseDate = updatedGame.ReleaseDate;
+
+        if (updatedGame.GenreIds != null)
+        {
+            _dbContext.GameGenres.RemoveRange(existingGame.GameGenres);
+
+            var newGameGenres = updatedGame.GenreIds.Select(genreId => new GameGenre
+            {
+                GameId = existingGame.Id,
+                GenreId = genreId
+            });
+            _dbContext.GameGenres.AddRange(newGameGenres);
+        }
 
         await _dbContext.SaveChangesAsync();
         return true;

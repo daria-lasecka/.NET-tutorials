@@ -9,28 +9,30 @@ public class GameStoreContext(DbContextOptions<GameStoreContext> options)
     public DbSet<Game> Games => Set<Game>();
 
     public DbSet<Genre> Genres => Set<Genre>();
+    public DbSet<GameGenre> GameGenres => Set<GameGenre>();
 
     public DbSet<Publisher> Publishers => Set<Publisher>();
 
-    // protected override void OnModelCreating(ModelBuilder modelBuilder)
-    // {
-    //     // Configure the composite key for GamePublisher
-    //     modelBuilder.Entity<GamePublisher>()
-    //         .HasKey(gp => new { gp.GameId, gp.PublisherId });
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        // One-to-many: Game → Publisher
+        modelBuilder.Entity<Game>()
+            .HasOne(g => g.Publisher)
+            .WithMany(p => p.Games)
+            .HasForeignKey(g => g.PublisherId);
 
-    //     // Configure relationships
-    //     modelBuilder.Entity<GamePublisher>()
-    //         .HasOne(gp => gp.Game)
-    //         .WithMany(g => g.GamePublishers)
-    //         .HasForeignKey(gp => gp.GameId);
+        // Many-to-many: Game ↔ Genre
+        modelBuilder.Entity<GameGenre>()
+            .HasKey(gg => new { gg.GameId, gg.GenreId }); // composite primary key
 
-    //     modelBuilder.Entity<GamePublisher>()
-    //         .HasOne(gp => gp.Publisher)
-    //         .WithMany(p => p.GamePublishers)
-    //         .HasForeignKey(gp => gp.PublisherId);
+        modelBuilder.Entity<GameGenre>()
+            .HasOne(gg => gg.Game)
+            .WithMany(g => g.GameGenres)
+            .HasForeignKey(gg => gg.GameId);
 
-    //     // Configure Genre (when I change it to many to many)
-    //     // modelBuilder.Entity<Genre>()
-    //     //     .HasKey(gg => new { gg.GameId, gg.GenreId });
-    // }
+        modelBuilder.Entity<GameGenre>()
+            .HasOne(gg => gg.Genre)
+            .WithMany(g => g.GameGenres)
+            .HasForeignKey(gg => gg.GenreId);
+    }
 }
