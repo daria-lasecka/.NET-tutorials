@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GameStore.Api.Data.Migrations
 {
     [DbContext(typeof(GameStoreContext))]
-    [Migration("20260312125534_UpdateGamesToUseMultipleGenres")]
-    partial class UpdateGamesToUseMultipleGenres
+    [Migration("20260312151747_AddPublishersAndUpdateGamesToHaveMultipleGenres")]
+    partial class AddPublishersAndUpdateGamesToHaveMultipleGenres
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -7,7 +7,7 @@ public record GameSummaryDto(
     int Id,
     string Name,
     string Publisher,
-    List<string> Genre,
+    List<string> Genres,
     decimal Price,
     DateOnly ReleaseDate
 );

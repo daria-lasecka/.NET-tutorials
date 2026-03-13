@@ -5,7 +5,7 @@
 namespace GameStore.Api.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateGamesToUseMultipleGenres : Migration
+    public partial class AddPublishersAndUpdateGamesToHaveMultipleGenres : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -14,13 +14,15 @@ namespace GameStore.Api.Data.Migrations
                 name: "FK_Games_Genres_GenreId",
                 table: "Games");
 
-            migrationBuilder.DropIndex(
-                name: "IX_Games_GenreId",
-                table: "Games");
-
-            migrationBuilder.DropColumn(
+            migrationBuilder.RenameColumn(
                 name: "GenreId",
-                table: "Games");
+                table: "Games",
+                newName: "PublisherId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Games_GenreId",
+                table: "Games",
+                newName: "IX_Games_PublisherId");
 
             migrationBuilder.CreateTable(
                 name: "GameGenres",
@@ -46,29 +48,55 @@ namespace GameStore.Api.Data.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Publishers",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Publishers", x => x.Id);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_GameGenres_GenreId",
                 table: "GameGenres",
                 column: "GenreId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Games_Publishers_PublisherId",
+                table: "Games",
+                column: "PublisherId",
+                principalTable: "Publishers",
+                principalColumn: "Id",
+                onDelete: ReferentialAction.Cascade);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Games_Publishers_PublisherId",
+                table: "Games");
+
             migrationBuilder.DropTable(
                 name: "GameGenres");
 
-            migrationBuilder.AddColumn<int>(
-                name: "GenreId",
-                table: "Games",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0);
+            migrationBuilder.DropTable(
+                name: "Publishers");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Games_GenreId",
+            migrationBuilder.RenameColumn(
+                name: "PublisherId",
                 table: "Games",
-                column: "GenreId");
+                newName: "GenreId");
+
+            migrationBuilder.RenameIndex(
+                name: "IX_Games_PublisherId",
+                table: "Games",
+                newName: "IX_Games_GenreId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Games_Genres_GenreId",

@@ -8,6 +8,7 @@ builder.Services.AddValidation();
 builder.AddGameStoreDb();
 
 builder.Services.AddScoped<IGameService, GameService>();
+builder.Services.AddScoped<IPublisherService, PublisherService>();
 
 builder.Services.AddOpenApi();
 
