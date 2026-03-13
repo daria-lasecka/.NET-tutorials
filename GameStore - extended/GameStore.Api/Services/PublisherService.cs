@@ -69,6 +69,8 @@ public class PublisherService : IPublisherService
         };
 
         _dbContext.Publishers.Add(publisher);
+
+        await _dbContext.SaveChangesAsync();
         return new PublisherDto(publisher.Id, publisher.Name);
     }
 
