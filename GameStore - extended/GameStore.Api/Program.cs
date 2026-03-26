@@ -28,9 +28,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddOpenApi();
 
-builder.Services.AddIdentity<User, IdentityRole>()
-    .AddEntityFrameworkStores<GameStoreContext>()
-    .AddDefaultTokenProviders();
+// builder.Services.AddIdentity<User, IdentityRole>()
+//     .AddEntityFrameworkStores<GameStoreContext>()
+//     .AddDefaultTokenProviders();
 
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
