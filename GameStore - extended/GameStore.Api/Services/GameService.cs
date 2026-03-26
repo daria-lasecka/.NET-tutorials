@@ -105,8 +105,7 @@ public class GameService : IGameService
         _dbContext.Games.Add(game);
         await _dbContext.SaveChangesAsync();
 
-        // Assign genres
-        // TODO: assigning genres doesn't work...
+        // Assign genress
         if (newGame.GenreIds != null && newGame.GenreIds.Count != 0)
         {
             var gameGenres = newGame.GenreIds.Select(genreId => new GameGenre

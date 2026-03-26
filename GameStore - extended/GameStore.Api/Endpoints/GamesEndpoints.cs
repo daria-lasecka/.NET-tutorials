@@ -50,7 +50,8 @@ public static class GamesEndpoints
             .WithSummary("Create game")
             .WithDescription("Creates a game object and returns it with location.")
             .Produces<GameDetailsDto>(StatusCodes.Status201Created)
-            .WithTags(GamesTag);
+            .WithTags(GamesTag)
+            .RequireAuthorization(); // TODO: add protection to other endpoints
 
         // PUT /games/1
         group.MapPut("/{id}", async (int id, UpdateGameDto updatedGame, [FromServices] IGameService gameService) =>

@@ -1,5 +1,6 @@
 using GameStore.Api.Data;
 using GameStore.Api.Endpoints;
+using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,15 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 
 builder.Services.AddOpenApi();
+
+builder.Services.AddProblemDetails();
+
+builder.Services.AddIdentity<User, IdentityRole>()
+    .AddEntityFrameworkStores<GameStoreContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -28,8 +38,12 @@ else
     app.UseHsts();
 }
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 // app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseRequestLogging();
+app.UseStatusCodePages();
 
 app.UseWhen(
     context => context.Request.Path.StartsWithSegments("/api"),
@@ -47,8 +61,9 @@ app.MapWhen(
 app.MapGamesEndpoints();
 app.MapGenresEndpoints();
 app.MapPublishersEndpoints();
+app.MapAuthEndpoints();
 
-app.MigrateDb();
+await app.MigrateDbAndSeedAsync();
 
 /* 
 Recommended execution order:
@@ -73,3 +88,39 @@ app.Run();
 //  $env:ConnectionStrings__GameStore="Data Source=Production.db" (Windows's Power Shell)
 // run
 //  export ConnectionStrings__GameStore="Data Source=Production.db"
+
+/*
+TODO: clean up Program.cs file using the below code as base...
+
+using YourApi.Handlers;
+using Scalar.AspNetCore;
+
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddProblemDetails(options =>
+{
+    options.CustomizeProblemDetails = ctx =>
+    {
+        ctx.ProblemDetails.Extensions["traceId"] = ctx.HttpContext.TraceIdentifier;
+        ctx.ProblemDetails.Extensions["timestamp"] = DateTime.UtcNow;
+        ctx.ProblemDetails.Instance = $"{ctx.HttpContext.Request.Method} {ctx.HttpContext.Request.Path}";
+    };
+});
+
+// Register exception handlers (order matters for chaining)
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+
+builder.Services.AddOpenApi();
+
+var app = builder.Build();
+
+app.UseExceptionHandler();
+
+app.MapOpenApi();
+app.MapScalarApiReference(); // API docs at /scalar/v1
+
+// Your endpoints here...
+
+app.Run();
+
+*/
