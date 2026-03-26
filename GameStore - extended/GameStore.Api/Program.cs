@@ -19,6 +19,7 @@ builder.Services.AddProblemDetails(options =>
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 builder.Services.AddValidation();
+
 builder.AddGameStoreDb();
 
 builder.Services.AddScoped<IGameService, GameService>();
@@ -31,13 +32,6 @@ builder.Services.AddIdentity<User, IdentityRole>()
     .AddEntityFrameworkStores<GameStoreContext>()
     .AddDefaultTokenProviders();
 
-//builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-
-// Add services to the container.
-builder.Services.AddControllers();
-
-// Configure JWT Authentication
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
@@ -54,6 +48,11 @@ builder.Services.AddAuthentication("Bearer")
             )
         };
     });
+
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
@@ -76,7 +75,6 @@ else
 app.UseAuthentication();
 app.UseAuthorization();
 
-// app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseRequestLogging();
 app.UseStatusCodePages();
 
@@ -100,6 +98,14 @@ app.MapAuthEndpoints();
 
 await app.MigrateDbAndSeedAsync();
 
+
+app.Run();
+
+// during the course instead of running 
+//  $env:ConnectionStrings__GameStore="Data Source=Production.db" (Windows's Power Shell)
+// run
+//  export ConnectionStrings__GameStore="Data Source=Production.db"
+
 /* 
 Recommended execution order:
 
@@ -116,10 +122,3 @@ app.UseMiddleware<RequestLoggingMiddleware>();// 10. Custom middleware
 app.MapControllers();                        // 11. Execute endpoints
 
 */
-
-app.Run();
-
-// during the course instead of running 
-//  $env:ConnectionStrings__GameStore="Data Source=Production.db" (Windows's Power Shell)
-// run
-//  export ConnectionStrings__GameStore="Data Source=Production.db"
