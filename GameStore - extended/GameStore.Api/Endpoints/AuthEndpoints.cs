@@ -8,35 +8,41 @@ using System.Text;
 
 public static class AuthEndpoints
 {
+    const string AuthTag = "Auth";
+    
     public static void MapAuthEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/auth");
 
         // Registration endpoint
         group.MapPost("/register", async (
-            UserManager<User> userManager,
-            RegisterDto request,
-            IConfiguration configuration) =>
-        {
-            var user = new User
+                UserManager<User> userManager,
+                RegisterDto request,
+                IConfiguration configuration) =>
             {
-                UserName = request.Email,
-                Email = request.Email
-            };
+                var user = new User
+                {
+                    UserName = request.Email,
+                    Email = request.Email
+                };
 
-            var result = await userManager.CreateAsync(user, request.Password);
+                var result = await userManager.CreateAsync(user, request.Password);
 
-            if (!result.Succeeded)
-                return Results.BadRequest(result.Errors);
+                if (!result.Succeeded)
+                    return Results.BadRequest(result.Errors);
 
-            // Assign default role (User) to new user
-            await userManager.AddToRoleAsync(user, Authorization.Roles.User.ToString());
+                // Assign default role (User) to new user
+                await userManager.AddToRoleAsync(user, Authorization.Roles.User.ToString());
 
-            // Generate JWT token with roles
-            var token = await GenerateJwtTokenAsync(user, userManager, configuration);
+                // Generate JWT token with roles
+                var token = await GenerateJwtTokenAsync(user, userManager, configuration);
 
-            return Results.Ok(new { Token = token });
-        });
+                return Results.Ok(new { Token = token });
+            })
+            .WithName("Register")
+            .WithSummary("Register user")
+            .WithDescription("Registers a new user.")
+            .WithTags(AuthTag);
 
         // Login endpoint
         group.MapPost("/login", async (
@@ -59,7 +65,11 @@ public static class AuthEndpoints
             var token = await GenerateJwtTokenAsync(user, userManager, configuration);
 
             return Results.Ok(new { Token = token });
-        });
+        })
+            .WithName("Login")
+            .WithSummary("Login user")
+            .WithDescription("Logins user into the app.")
+            .WithTags(AuthTag);
 
         // Logout endpoint
         // JWT doesn't need to be logged out server-side; we'll just send a logout message.
@@ -67,7 +77,11 @@ public static class AuthEndpoints
         {
             // JWT simply expires, so there’s nothing to do for logout on the server side
             return Results.Ok("User logged out");
-        });
+        })
+        .WithName("Logut")
+        .WithSummary("Logout user")
+        .WithDescription("Logouts user from the app.")
+        .WithTags(AuthTag);
 
         // "Me" endpoint - Returns user info from JWT token
         group.MapGet("/me", (HttpContext ctx) =>
@@ -82,7 +96,13 @@ public static class AuthEndpoints
                 Name = user.Identity?.Name,
                 Claims = user.Claims.Select(c => new { c.Type, c.Value })
             });
-        }).RequireAuthorization();
+        })
+        .WithName("Me")
+        .WithSummary("Get user info")
+        .WithDescription("Gets current users info from the app.")
+        .WithTags(AuthTag)
+        .RequireAuthorization();
+
     }
 
     // Method to generate the JWT token with role claims

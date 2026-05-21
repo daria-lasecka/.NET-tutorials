@@ -1,7 +1,6 @@
 using GameStore.Api.Data;
 using GameStore.Api.Endpoints;
 using GameStoreApi.Handlers;
-using Microsoft.AspNetCore.Identity;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -52,28 +51,12 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-// builder.Services
-//     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//     .AddJwtBearer(options =>
-//     {
-//         options.TokenValidationParameters = new TokenValidationParameters
-//         {
-//             ValidateIssuer = false,
-//             ValidateAudience = false,
-//             ValidateIssuerSigningKey = true,
-//             IssuerSigningKey = new SymmetricSecurityKey(
-//                 Encoding.UTF8.GetBytes(jwtKey))
-//         };
-//     });
-
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminOnly",
         policy => policy.RequireRole("Administrator"));
     options.AddPolicy("AdminOrModerator",
         policy => policy.RequireRole("Administrator", "Moderator"));
-    // options.AddPolicy("AdminOnly", policy =>
-    //     policy.RequireClaim(ClaimTypes.Role, "admin"));
 });
 
 builder.Services.AddControllers();
