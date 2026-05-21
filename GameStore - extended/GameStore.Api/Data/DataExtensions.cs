@@ -57,9 +57,16 @@ public static class DataExtensions
             })
         );
 
-        builder.Services.AddIdentity<User, IdentityRole>()
+        // For JWT API - only add UserManager and RoleManager, not the full Identity with default authentication
+        builder.Services.AddHttpContextAccessor();
+        
+        builder.Services.AddIdentityCore<User>()
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<GameStoreContext>()
                 .AddDefaultTokenProviders();
+
+        // Add SignInManager for password verification
+        builder.Services.AddScoped<SignInManager<User>>();
 
         builder.Services.AddTransient<ApplicationDbContextSeed>();
     }

@@ -26,6 +26,9 @@ builder.Services.AddScoped<IGameService, GameService>();
 builder.Services.AddScoped<IPublisherService, PublisherService>();
 builder.Services.AddScoped<IUserService, UserService>();
 
+// Bind JWT settings to the strongly-typed JWT class so IOptions<JWT> can be injected
+builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
+
 builder.Services.AddOpenApi();
 
 // builder.Services.AddIdentity<User, IdentityRole>()
@@ -49,8 +52,29 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
+// builder.Services
+//     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//     .AddJwtBearer(options =>
+//     {
+//         options.TokenValidationParameters = new TokenValidationParameters
+//         {
+//             ValidateIssuer = false,
+//             ValidateAudience = false,
+//             ValidateIssuerSigningKey = true,
+//             IssuerSigningKey = new SymmetricSecurityKey(
+//                 Encoding.UTF8.GetBytes(jwtKey))
+//         };
+//     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOnly",
+        policy => policy.RequireRole("Administrator"));
+    options.AddPolicy("AdminOrModerator",
+        policy => policy.RequireRole("Administrator", "Moderator"));
+    // options.AddPolicy("AdminOnly", policy =>
+    //     policy.RequireClaim(ClaimTypes.Role, "admin"));
+});
 
 builder.Services.AddControllers();
 

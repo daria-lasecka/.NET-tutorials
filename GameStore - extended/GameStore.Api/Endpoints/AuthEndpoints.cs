@@ -16,7 +16,7 @@ public static class AuthEndpoints
         group.MapPost("/register", async (
             UserManager<User> userManager,
             RegisterDto request,
-            IConfiguration configuration) => // Inject IConfiguration here
+            IConfiguration configuration) =>
         {
             var user = new User
             {
@@ -29,8 +29,11 @@ public static class AuthEndpoints
             if (!result.Succeeded)
                 return Results.BadRequest(result.Errors);
 
-            // After registration, log in the user automatically and return a JWT token
-            var token = GenerateJwtToken(user, request.Password, configuration); // Pass IConfiguration here
+            // Assign default role (User) to new user
+            await userManager.AddToRoleAsync(user, Authorization.Roles.User.ToString());
+
+            // Generate JWT token with roles
+            var token = await GenerateJwtTokenAsync(user, userManager, configuration);
 
             return Results.Ok(new { Token = token });
         });
@@ -52,8 +55,8 @@ public static class AuthEndpoints
             if (!result.Succeeded)
                 return Results.Unauthorized();
 
-            // Generate JWT token
-            var token = GenerateJwtToken(user, request.Password, configuration);
+            // Generate JWT token (with roles)
+            var token = await GenerateJwtTokenAsync(user, userManager, configuration);
 
             return Results.Ok(new { Token = token });
         });
@@ -82,31 +85,41 @@ public static class AuthEndpoints
         }).RequireAuthorization();
     }
 
-    // Method to generate the JWT token
-    private static string GenerateJwtToken(User user, string password, IConfiguration configuration)
+    // Method to generate the JWT token with role claims
+    private static async Task<string> GenerateJwtTokenAsync(User user, UserManager<User> userManager, IConfiguration configuration)
     {
         var issuer = configuration["JWT:Issuer"];
         var audience = configuration["JWT:Audience"];
+
         var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(JwtRegisteredClaimNames.Iss, issuer),
-            new Claim(JwtRegisteredClaimNames.Aud, audience),
-            new Claim("id", user.Id), // You can add custom claims here, like user ID or roles
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
+            new Claim(ClaimTypes.Name, user.UserName ?? string.Empty)
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]));
+        // Add role claims (required for authorization policies to work)
+        var roles = await userManager.GetRolesAsync(user);
+        foreach (var role in roles)
+        {
+            claims.Add(new Claim(ClaimTypes.Role, role));
+        }
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"] ?? string.Empty));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // Get the duration from appsettings.json
-        int durationInMinutes = int.Parse(configuration["JWT:DurationInMinutes"]); // Default to 60 minutes
+        // Get duration from configuration
+        double durationInMinutes = 60;
+        var durationStr = configuration["JWT:DurationInMinutes"];
+        if (!string.IsNullOrEmpty(durationStr) && double.TryParse(durationStr, out var d))
+            durationInMinutes = d;
 
         var token = new JwtSecurityToken(
             issuer: issuer,
             audience: audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(durationInMinutes), // Set expiration time using configuration value
+            expires: DateTime.UtcNow.AddMinutes(durationInMinutes),
             signingCredentials: creds
         );
 
