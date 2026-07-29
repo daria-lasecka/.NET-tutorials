@@ -50,7 +50,8 @@ public static class GamesEndpoints
             .WithSummary("Create game")
             .WithDescription("Creates a game object and returns it with location.")
             .Produces<GameDetailsDto>(StatusCodes.Status201Created)
-            .WithTags(GamesTag);
+            .WithTags(GamesTag)
+            .RequireAuthorization("AdminOrModerator");
 
         // PUT /games/1
         group.MapPut("/{id}", async (int id, UpdateGameDto updatedGame, [FromServices] IGameService gameService) =>
@@ -63,7 +64,8 @@ public static class GamesEndpoints
         .WithDescription("Updated a game basedon their unique identifier.")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status404NotFound)
-        .WithTags(GamesTag);
+        .WithTags(GamesTag)
+        .RequireAuthorization("AdminOrModerator");
 
         // DELETE /games/1
         group.MapDelete("/{id}", async (int id, [FromServices] IGameService gameService) =>
@@ -76,6 +78,7 @@ public static class GamesEndpoints
         .WithDescription("Deletes a game basedon their unique identifier.")
         .Produces(StatusCodes.Status204NoContent)
         .Produces(StatusCodes.Status404NotFound)
-        .WithTags(GamesTag);
+        .WithTags(GamesTag)
+        .RequireAuthorization("AdminOnly");
     }
 }

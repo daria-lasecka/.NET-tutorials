@@ -1,0 +1,5 @@
+-- SELECT * FROM AspNetUsers Where Id = "1072a451-210b-460f-a56e-0327953f1e3d";
+
+-- UPDATE AspNetUsers 
+-- SET UserName = 'NeiKos496', NormalizedUserName = 'NEIKOS496' 
+-- Where Id = "1072a451-210b-460f-a56e-0327953f1e3d" ;
