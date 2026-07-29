@@ -103,10 +103,15 @@ app.MapGenresEndpoints();
 app.MapPublishersEndpoints();
 app.MapAuthEndpoints();
 
-await app.MigrateDbAndSeedAsync();
+if (!app.Environment.IsEnvironment("Testing"))
+{
+    await app.MigrateDbAndSeedAsync();
+}
 
 
 app.Run();
+
+public partial class Program { }
 
 // during the course instead of running 
 //  $env:ConnectionStrings__GameStore="Data Source=Production.db" (Windows's Power Shell)
