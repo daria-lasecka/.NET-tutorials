@@ -267,4 +267,26 @@ public class GamesEndpointsTests
         response.StatusCode.Should()
             .Be(HttpStatusCode.Unauthorized);
     }
+    
+    [Fact]
+    public async Task CreateGame_ReturnsBadRequest_WhenDateFormatIsInvalid()
+    {
+        AsAdmin();
+
+        var request = new
+        {
+            name = "Celeste",
+            publisherId = 1,
+            genreIds = Array.Empty<int>(),
+            price = 19.99,
+            releaseDate = "17/09/2020"
+        };
+
+        var response = await _client.PostAsJsonAsync(
+            "/games",
+            request);
+
+        response.StatusCode.Should()
+            .Be(HttpStatusCode.BadRequest);
+    }
 }

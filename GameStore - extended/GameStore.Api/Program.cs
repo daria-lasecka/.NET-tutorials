@@ -30,10 +30,6 @@ builder.Services.Configure<JWT>(builder.Configuration.GetSection("JWT"));
 
 builder.Services.AddOpenApi();
 
-// builder.Services.AddIdentity<User, IdentityRole>()
-//     .AddEntityFrameworkStores<GameStoreContext>()
-//     .AddDefaultTokenProviders();
-
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer(options =>
     {
@@ -65,7 +61,6 @@ var app = builder.Build();
 
 app.UseExceptionHandler();
 
-// app.UseMiddleware<MaintenanceMiddleware>();
 app.UseMaintenance();
 
 if (app.Environment.IsDevelopment())
@@ -132,5 +127,66 @@ app.UseRateLimiter();                        // 8. Enforce rate limits
 app.UseResponseCompression();                // 9. Compress responses
 app.UseMiddleware<RequestLoggingMiddleware>();// 10. Custom middleware
 app.MapControllers();                        // 11. Execute endpoints
+
+*/
+
+/*
+Header: Authorization Bearer pasted_token
+Examples ready to copy (with random genres):
+Publishers:
+{
+    "name": "Team Cherry"
+} 
+
+{
+    "name": "Supergiant Games"
+}
+
+Games:
+{
+    "name": "Hollow Knight",
+    "publisherId": Check publisher ID (Team Cherry)
+    "genreIds": [
+        4,
+        5
+    ],
+    "price": 14.99,
+    "releaseDate": "1.1.1990" // "2017-02-24" <- correct date and format, added wrong one to show exception
+}
+
+{
+    "name": "Hollow Knight: Silksong",
+    "publisherId":  Check publisher ID (Team Cherry)
+    "genreIds": [
+        2,
+        3,
+        5
+    ],
+    "price": 19.99,
+    "releaseDate": "2025-09-04"
+}
+
+{
+    "name": "Hades",
+    "publisherId": Check publisher ID (Supergiant Games)
+    "genreIds": [
+        1,
+        2,
+        5
+    ],
+    "price": 24.99,
+    "releaseDate": "2020-09-17"
+}
+
+{
+    "name": "The Legend of Zelda: Tears of the Kingdom",
+    "publisherId": Check publisher ID (Nintendo)
+    "genreIds": [
+        4,
+        5
+    ],
+    "price": 69.99,
+    "releaseDate": "2023-05-12"
+}
 
 */

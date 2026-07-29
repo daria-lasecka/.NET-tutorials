@@ -1,6 +1,8 @@
+using System.Text.Json;
 using GameStoreApi.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace GameStoreApi.Handlers;
 
@@ -42,6 +44,10 @@ public sealed class GlobalExceptionHandler(
     private static (int StatusCode, string Title) MapException(Exception exception) => exception switch
     {
         AppException appEx => ((int)appEx.StatusCode, appEx.Message),
+
+        BadHttpRequestException badRequest when badRequest.InnerException is JsonException =>
+            (StatusCodes.Status400BadRequest, "Invalid request body"),
+        JsonException => (StatusCodes.Status400BadRequest, "Invalid JSON"),
         ArgumentNullException => (StatusCodes.Status400BadRequest, "Invalid argument provided"),
         ArgumentException => (StatusCodes.Status400BadRequest, "Invalid argument provided"),
         UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
@@ -58,13 +64,55 @@ public sealed class GlobalExceptionHandler(
         _ => "https://tools.ietf.org/html/rfc9110#section-15.6.1"
     };
 
+    // private static string? GetSafeErrorMessage(Exception exception, HttpContext context)
+    // {
+    //     var env = context.RequestServices.GetRequiredService<IHostEnvironment>();
+    //     if (env.IsDevelopment())
+    //     {
+    //         return exception.Message;
+    //     }
+    //     return exception is AppException ? exception.Message : null;
+    // }
+    
+    private static TException? FindException<TException>(Exception exception) where TException : Exception
+    {
+        while (exception != null)
+        {
+            if (exception is TException typedException)
+            {
+                return typedException;
+            }
+            
+            exception = exception.InnerException!;
+        }
+
+        return null;
+    }
+    
     private static string? GetSafeErrorMessage(Exception exception, HttpContext context)
     {
-        var env = context.RequestServices.GetRequiredService<IHostEnvironment>();
+        var jsonException = FindException<JsonException>(exception);
+
+        if (jsonException != null)
+        {
+            if (jsonException.InnerException is FormatException)
+            {
+                return "Invalid date format. Expected format: yyyy-MM-dd.";
+            }
+
+            return "Invalid request body.";
+        }
+
+        var env = context.RequestServices
+            .GetRequiredService<IHostEnvironment>();
+
         if (env.IsDevelopment())
         {
             return exception.Message;
         }
-        return exception is AppException ? exception.Message : null;
+
+        return exception is AppException
+            ? exception.Message
+            : null;
     }
 }
